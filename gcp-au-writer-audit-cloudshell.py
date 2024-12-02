@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
 """
-GCP Audit Writer Identity Tool
-
-This script audits IAM policies of Google Cloud logging sink writer identities
-to ensure compliance with the principle of least privilege (NIST AC-6).
+GCP Audit Writer Identity Tool - Cloud Shell Version
+Audits IAM policies of Google Cloud logging sink writer identities
 """
 
-import os
 import sys
 import argparse
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple
 from google.api_core import exceptions
-from google.cloud import storage, bigquery, pubsub_v1, logging_v2
+from google.cloud import storage, bigquery
+from google.cloud import pubsub_v1
+from google.cloud import logging_v2
 
 
 @dataclass
@@ -43,19 +42,7 @@ class DestinationType:
 
 
 def get_writer_identity(sink_name: str, project_id: str) -> Tuple[str, str]:
-    """
-    Retrieve the writer identity and destination for a specific logging sink.
-
-    Args:
-        sink_name: Name of the logging sink
-        project_id: GCP project ID
-
-    Returns:
-        Tuple of (writer_identity, destination)
-
-    Raises:
-        google.api_core.exceptions.NotFound: If sink doesn't exist
-    """
+    """Retrieve the writer identity and destination for a specific logging sink."""
     try:
         client = logging_v2.Client(project=project_id)
         sink = client.sink(sink_name)
@@ -100,17 +87,7 @@ def audit_policy(
     writer_identity: str,
     destination_type: str
 ) -> List[AuditFinding]:
-    """
-    Audit the IAM policy for excessive permissions.
-
-    Args:
-        policy: IAM policy bindings
-        writer_identity: Writer identity to check
-        destination_type: Type of destination (bigquery, storage, pubsub)
-
-    Returns:
-        List of AuditFinding objects
-    """
+    """Audit the IAM policy for excessive permissions."""
     findings = []
     bindings = getattr(policy, 'bindings', policy)
     expected_role = DestinationType.EXPECTED_ROLES.get(destination_type)
@@ -149,10 +126,6 @@ def main():
     parser.add_argument("--project_id", required=True, help="GCP project ID")
     args = parser.parse_args()
 
-    # Verify authentication
-    if not os.getenv("GOOGLE_APPLICATION_CREDENTIALS"):
-        sys.exit("Error: GOOGLE_APPLICATION_CREDENTIALS environment variable not set")
-
     try:
         # Get writer identity and destination
         writer_identity, destination = get_writer_identity(args.sink_name, args.project_id)
@@ -190,5 +163,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-    
