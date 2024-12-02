@@ -2,7 +2,7 @@
 
 A Python tool for auditing IAM policies of Google Cloud logging sink writer identities. This tool validates permissions on sink destinations (Cloud Storage, BigQuery, Pub/Sub) to ensure compliance with the principle of least privilege.
 
-For the cloudshell version see _______
+For the Cloud Shell version see [README-cloudshell.md](README-cloudshell.md)
 
 ## Features
 
